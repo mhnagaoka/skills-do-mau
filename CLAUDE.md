@@ -2,6 +2,38 @@
 
 Personal collection of AI agent skills. Each skill follows the [Agent Skills Specification](https://agentskills.io/specification).
 
+## Ground Rules for maintaining this repository
+
+The following are ground rules for maintaining this repository (and not for the skills themselves):
+
+### Committing changes
+
+**Always ask before committing changes to git.** Never run `git commit` without explicit user confirmation
+
+### Commit Messages
+
+Follow this format for all commits:
+
+```
+<Summary of the changes>
+
+- <Change 1>: <Reasoning>
+- <Change 2>: <Reasoning>
+- ...
+```
+
+The summary line should describe the intent in plain language. Each bullet should state what changed and why, not just what was done.
+
+**Example:**
+
+```
+Update omarchy-check-updates to assess Intel Xe impact
+
+- Add lsmod check for xe/i915 modules: ensures we only flag relevant updates
+- Include /proc/cmdline inspection: detects if panel replay override is active
+- Add limine/cmdline config search: matches release notes against boot config
+```
+
 ## Structure
 
 A skill is a directory containing, at minimum, a `SKILL.md` file:
@@ -159,30 +191,6 @@ Keep file references one level deep from `SKILL.md`. Avoid deeply nested referen
 - Prefer `gh`, `rg`, `jq`, and standard POSIX tools. Avoid adding new dependencies.
 - Do not duplicate system-wide `AGENTS.md` instructions; focus on skill-specific behavior.
 - Use concise language. This is reference material, not a user guide.
-
-## Commit Messages
-
-Follow this format for all commits:
-
-```
-<Summary of the changes>
-
-- <Change 1>: <Reasoning>
-- <Change 2>: <Reasoning>
-- ...
-```
-
-The summary line should describe the intent in plain language. Each bullet should state what changed and why, not just what was done.
-
-**Example:**
-
-```
-Update omarchy-check-updates to assess Intel Xe impact
-
-- Add lsmod check for xe/i915 modules: ensures we only flag relevant updates
-- Include /proc/cmdline inspection: detects if panel replay override is active
-- Add limine/cmdline config search: matches release notes against boot config
-```
 
 ## Validation
 
