@@ -23,12 +23,12 @@ The `SKILL.md` file must contain YAML frontmatter followed by Markdown content.
 
 | Field           | Required | Constraints                                                                                                       |
 | --------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
-| `name`          | Yes      | Max 64 characters. Lowercase letters, numbers, and hyphens only. Must not start or end with a hyphen.             |
-| `description`   | Yes      | Max 1024 characters. Non-empty. Describes what the skill does and when to use it.                                 |
-| `license`       | No       | License name or reference to a bundled license file.                                                              |
-| `compatibility` | No       | Max 500 characters. Indicates environment requirements (intended product, system packages, network access, etc.). |
-| `metadata`      | No       | Arbitrary key-value mapping for additional metadata.                                                              |
-| `allowed-tools` | No       | Space-separated string of pre-approved tools the skill may use. (Experimental)                                    |
+| `name`          | Yes      | 1–64 chars. Lowercase letters, numbers, hyphens only. No leading/trailing hyphen. No consecutive hyphens. Must match directory name. |
+| `description`   | Yes      | 1–1024 chars. Describes what the skill does **and** when to use it. Include keywords to help agents match tasks. |
+| `license`       | No       | License name or reference to a bundled license file. Keep it short.                                               |
+| `compatibility` | No       | 1–500 chars if provided. Only include if your skill has specific environment requirements. Most skills do not need this. |
+| `metadata`      | No       | Map of string keys to string values. Use reasonably unique key names to avoid conflicts.                          |
+| `allowed-tools` | No       | Space-separated string of pre-approved tools. (Experimental — support varies by agent.)                           |
 
 **Minimal example:**
 
@@ -52,17 +52,53 @@ metadata:
 ---
 ```
 
+#### `name` field constraints
+
+- Must be 1–64 characters.
+- May only contain lowercase alphanumeric characters (`a-z`, `0-9`) and hyphens (`-`).
+- Must not start or end with a hyphen.
+- Must not contain consecutive hyphens (`--`).
+- Must match the parent directory name.
+
+**Valid:** `pdf-processing`, `data-analysis`, `code-review`  
+**Invalid:** `PDF-Processing` (uppercase), `-pdf` (leading hyphen), `pdf--processing` (consecutive hyphens)
+
+#### `description` field guidance
+
+- Should describe **both** what the skill does **and** when to use it.
+- Should include specific keywords that help agents identify relevant tasks.
+
+**Good:** `Extracts text and tables from PDF files, fills PDF forms, and merges multiple PDFs. Use when working with PDF documents or when the user mentions PDFs, forms, or document extraction.`  
+**Poor:** `Helps with PDFs.`
+
+#### `compatibility` field examples
+
+```yaml
+compatibility: Designed for Claude Code (or similar products)
+```
+
+```yaml
+compatibility: Requires git, docker, jq, and access to the internet
+```
+
 ### Body Content
 
-The Markdown body after the frontmatter contains the skill instructions. There are no format restrictions. Write whatever helps agents perform the task effectively.
+The Markdown body after the frontmatter contains the skill instructions. There are no format restrictions — write whatever helps agents perform the task effectively.
+
+The agent will load this entire file once it's decided to activate a skill. **Consider splitting longer `SKILL.md` content into referenced files.**
 
 Recommended sections:
+
+- **Step-by-step instructions**
+- **Examples** — inputs and outputs
+- **Common edge cases**
+
+Optional but useful sections:
 
 - **When To Use** — bullet list of triggers that should activate this skill.
 - **Safety Rules** — if the skill touches system state, explicitly list what NOT to do.
 - **Workflow** — step-by-step commands or logic. Prefer copy-pasteable shell snippets.
 - **Report Format** — if the skill produces output, describe the expected structure.
-- **Examples** — inputs and outputs, or edge cases.
 
 ## Optional Directories
 
