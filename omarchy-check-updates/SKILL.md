@@ -1,6 +1,6 @@
 ---
 name: omarchy-check-updates
-description: Check for available Omarchy updates, compare versions, fetch release notes from GitHub, and assess whether the update affects the current machine. Generates a concise report with hardware impact analysis.
+description: Check for available Omarchy updates, compare versions, fetch release notes from GitHub, and assess whether the update affects the current machine. Also lists available system package updates from the official repos and the AUR. Generates a concise report with hardware impact analysis.
 ---
 
 # Omarchy Update Checker
@@ -16,6 +16,7 @@ Use this skill when the user asks to:
 - Check Omarchy GitHub release notes
 - Determine whether Omarchy update changes affect this hardware
 - Summarize whether an Omarchy update is worth applying on this machine
+- List available system/package updates (official repos and AUR)
 
 ## Safety Rules
 
@@ -38,7 +39,7 @@ omarchy version
 omarchy-update-available --version
 ```
 
-3. If no update is available, report that and stop unless the user asked for release details anyway.
+3. If no Omarchy update is available, say so and skip the release-notes and hardware-impact steps (4–6). Still run the package-update listing (step 7) and emit the report — an up-to-date Omarchy does not end the run.
 
 4. Fetch release notes from GitHub for the relevant versions. Prefer `gh`:
 
@@ -61,16 +62,26 @@ test -f /etc/kernel/cmdline && rg -n '<specific-release-keyword>' /etc/kernel/cm
 
 Replace `<specific-release-keyword>` with a precise term from the release notes, such as `xe\.enable_panel_replay`, a package name, service name, driver name, config key, or command name.
 
-7. For package-related release notes, use read-only package queries:
+For package-related release notes, also check whether a specific package is installed:
 
 ```bash
 pacman -Q <package>
 pacman -Qs <package-or-keyword>
-pacman -Qu
-yay -Qua
 ```
 
-Only run `yay -Qua` if `yay` is available. Do not install `checkupdates`, `paru`, or any helper just to perform the check.
+7. List available package updates (run this on every invocation, even when no Omarchy update is available):
+
+```bash
+# Official-repo updates. No sudo: checkupdates syncs a private temp copy of the DB.
+# No output + exit 2 means "no repo updates available" — this is NOT an error.
+checkupdates || true
+
+# AUR updates, only if yay is available.
+# No output + exit 1 means "no AUR updates available" — this is NOT an error.
+command -v yay >/dev/null && (yay -Qua || true)
+```
+
+`checkupdates` (from `pacman-contrib`) is the accurate, no-sudo way to list official-repo updates. If it is not installed, fall back to `yay -Qu` or `pacman -Qu` and flag the results as possibly stale, since those compare against the local sync database without refreshing it. Do not install `checkupdates`, `paru`, or any helper just to perform the check, and never run `pacman -Sy` (requires sudo and risks a partial upgrade).
 
 ## Report Format
 
@@ -82,7 +93,11 @@ Keep the response concise and include:
 - Summary of changes
 - Impact assessment: affected, not affected, likely affected, or unclear
 - Evidence checked, including relevant hardware, kernel command line, boot config, loaded modules, installed packages, or services
-- Explicitly state that no update was applied
+- Available package updates:
+  - Official repos: count and the packages as `name old -> new` (or "none")
+  - AUR: same format, listed separately (or "none")
+  - If the listing fell back to `pacman -Qu`/`yay -Qu`, note that results may be stale
+- Explicitly state that no update was applied and nothing was installed
 
 ## Example Assessment
 
