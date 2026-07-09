@@ -20,7 +20,7 @@ Use this skill when the user asks to:
 
 ## Safety Rules
 
-- Never run `omarchy update`, `omarchy update perform`, or `omarchy update -y`.
+- Never run `omarchy update perform` or `omarchy update -y`. `omarchy update available` (read-only) is safe to use.
 - Never change files, packages, bootloader settings, or kernel parameters.
 - Prefer read-only commands and report what was checked.
 - If a command would require sudo or prompts, do not run it unless the user explicitly asks.
@@ -36,7 +36,7 @@ omarchy version
 2. Check latest available version:
 
 ```bash
-omarchy-update-available --version
+omarchy update available
 ```
 
 3. If no Omarchy update is available, say so and skip the release-notes and hardware-impact steps (4–6). Still run the package-update listing (step 7) and emit the report — an up-to-date Omarchy does not end the run.
