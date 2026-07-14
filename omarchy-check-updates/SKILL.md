@@ -1,6 +1,6 @@
 ---
 name: omarchy-check-updates
-description: Check for available Omarchy updates, compare versions, fetch release notes from GitHub, and assess whether the update affects the current machine. Also lists available system package updates from the official repos and the AUR. Generates a concise report with hardware impact analysis.
+description: Check for available Omarchy updates, compare versions, fetch release notes from GitHub, and assess whether the update affects the current machine. Also lists available system package updates from the official repos and the AUR, plus outdated mise-managed global dev tools. Generates a concise report with hardware impact analysis.
 ---
 
 # Omarchy Update Checker
@@ -83,6 +83,19 @@ command -v yay >/dev/null && (yay -Qua || true)
 
 `checkupdates` (from `pacman-contrib`) is the accurate, no-sudo way to list official-repo updates. If it is not installed, fall back to `yay -Qu` or `pacman -Qu` and flag the results as possibly stale, since those compare against the local sync database without refreshing it. Do not install `checkupdates`, `paru`, or any helper just to perform the check, and never run `pacman -Sy` (requires sudo and risks a partial upgrade).
 
+8. List outdated `mise`-managed global tools (Omarchy ships `mise` out of the box, so no guard is needed):
+
+```bash
+# Outdated tools managed by mise (dev tools installed via `mise use -g ...`).
+# Empty output means everything is up to date. Columns: tool, requested, current, latest, config.
+mise outdated
+
+# mise updates itself separately from its managed tools; surface its own update if any.
+mise version
+```
+
+`mise outdated` is read-only. Do not run `mise upgrade`, `mise self-update`, or install anything.
+
 ## Report Format
 
 Keep the response concise and include:
@@ -97,6 +110,7 @@ Keep the response concise and include:
   - Official repos: count and the packages as `name old -> new` (or "none")
   - AUR: same format, listed separately (or "none")
   - If the listing fell back to `pacman -Qu`/`yay -Qu`, note that results may be stale
+  - mise global tools: outdated tools as `name current -> latest` (or "none"), plus a note if `mise` itself has an update available
 - Explicitly state that no update was applied and nothing was installed
 
 ## Example Assessment
